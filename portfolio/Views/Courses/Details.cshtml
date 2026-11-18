@@ -1,0 +1,30 @@
+﻿@model portfolio.Models.Course
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<h1>@Model.Code: @Model.Title</h1>
+<p class="text-muted">@Model.Term, SY @Model.SchoolYear</p>
+<p>@Model.Description</p>
+
+<h2 class="h4 mt-4">Projects</h2>
+
+@if (!Model.Projects.Any())
+{
+    <p class="text-muted">No projects in this course yet.</p>
+}
+
+<div class="list-group mb-4">
+    @foreach (var p in Model.Projects)
+    {
+        <a class="list-group-item list-group-item-action" asp-controller="Projects" asp-action="Details" asp-route-id="@p.ProjectId">
+            <div class="d-flex justify-content-between">
+                <strong>@p.Title</strong>
+                <span class="badge bg-secondary">@p.ImageCount image(s)</span>
+            </div>
+            <small class="text-muted">@p.Description</small>
+        </a>
+    }
+</div>
+
+<a asp-action="Index">Back to courses</a>

@@ -1,0 +1,44 @@
+﻿@model portfolio.Models.Project
+@{
+    ViewData["Title"] = Model.Title;
+    // Turn a YouTube link into the address of an embeddable player.
+    var videoId = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl ?? "", @"(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})").Groups[1].Value;
+}
+
+<h1>@Model.Title</h1>
+<p class="text-muted">
+    <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId">@Model.CourseCode: @Model.CourseTitle</a>
+    @if (Model.CompletedOn is not null)
+    {
+        <span> &middot; Completed @Model.CompletedOn.Value.ToString("MMMM d, yyyy")</span>
+    }
+</p>
+<p>@Model.Description</p>
+
+@if (videoId != "")
+{
+    <h2 class="h4 mt-4">Demo video</h2>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/@videoId" title="Project demo" allowfullscreen></iframe>
+}
+
+<h2 class="h4 mt-4">Images</h2>
+@if (!Model.Images.Any())
+{
+    <p class="text-muted">No images yet.</p>
+}
+<div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+    @foreach (var img in Model.Images)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <img src="@img.ImageUrl" class="card-img-top" alt="@(img.Caption ?? Model.Title)" />
+                @if (!string.IsNullOrWhiteSpace(img.Caption))
+                {
+                    <div class="card-body"><p class="card-text">@img.Caption</p></div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId">Back to course</a>

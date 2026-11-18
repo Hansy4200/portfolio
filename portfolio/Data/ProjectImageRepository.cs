@@ -1,5 +1,4 @@
-﻿
-using Npgsql;
+﻿using Npgsql;
 using portfolio.Models;
 
 namespace portfolio.Data;
@@ -8,138 +7,101 @@ public class ProjectImageRepository
 {
     private readonly NpgsqlDataSource _dataSource;
 
-    public ProjectImageRepository(NpgsqlDataSource dataSource)
-    {
-        _dataSource = dataSource;
-    }
+    public ProjectImageRepository(NpgsqlDataSource dataSource) => _dataSource = dataSource;
 
-    // Display images for one project
-    public async Task<List<ProjectImage>> GetByProjectIdAsync(long projectId)
+    private static ProjectImage Read(NpgsqlDataReader r) => new()
     {
-        var images = new List<ProjectImage>();
+        ImageId = r.GetInt64(0),
+        ProjectId = r.GetInt64(1),
+        ImageUrl = r.GetString(2),
+        Caption = r.IsDBNull(3) ? null : r.GetString(3),
+        SortOrder = r.GetInt32(4)
+    };
 
+    public async Task<List<ProjectImage>> GetByProjectAsync(long projectId)
+    {
         const string sql = """
-            SELECT project_image_id, project_id,
-                   image_url, alt_text, display_order
+            SELECT image_id, project_id, image_url, caption, sort_order
             FROM portfolio.project_image
             WHERE project_id = @project_id
-            ORDER BY display_order, project_image_id;
+            ORDER BY sort_order, image_id;
             """;
+
+        var list = new List<ProjectImage>();
 
         await using var connection = await _dataSource.OpenConnectionAsync();
         await using var command = new NpgsqlCommand(sql, connection);
-
         command.Parameters.AddWithValue("project_id", projectId);
 
         await using var reader = await command.ExecuteReaderAsync();
-
         while (await reader.ReadAsync())
-        {
-            images.Add(new ProjectImage
-            {
-                ProjectImageId = reader.GetInt64(0),
-                ProjectId = reader.GetInt64(1),
-                ImageUrl = reader.GetString(2),
-                AltText = reader.GetString(3),
-                DisplayOrder = reader.GetInt32(4)
-            });
-        }
+            list.Add(Read(reader));
 
-        return images;
+        return list;
     }
 
-    // Find one image
     public async Task<ProjectImage?> GetByIdAsync(long id)
     {
         const string sql = """
-            SELECT project_image_id, project_id,
-                   image_url, alt_text, display_order
+            SELECT image_id, project_id, image_url, caption, sort_order
             FROM portfolio.project_image
-            WHERE project_image_id = @id;
+            WHERE image_id = @id;
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync();
         await using var command = new NpgsqlCommand(sql, connection);
-
         command.Parameters.AddWithValue("id", id);
 
         await using var reader = await command.ExecuteReaderAsync();
-
-        if (!await reader.ReadAsync())
-            return null;
-
-        return new ProjectImage
-        {
-            ProjectImageId = reader.GetInt64(0),
-            ProjectId = reader.GetInt64(1),
-            ImageUrl = reader.GetString(2),
-            AltText = reader.GetString(3),
-            DisplayOrder = reader.GetInt32(4)
-        };
+        return await reader.ReadAsync() ? Read(reader) : null;
     }
 
-    // Add an image
     public async Task<long> AddAsync(ProjectImage image)
     {
         const string sql = """
-            INSERT INTO portfolio.project_image
-                (project_id, image_url, alt_text, display_order)
-            VALUES
-                (@project_id, @image_url, @alt_text, @display_order)
-            RETURNING project_image_id;
+            INSERT INTO portfolio.project_image (project_id, image_url, caption, sort_order)
+            VALUES (@project_id, @image_url, @caption, @sort_order)
+            RETURNING image_id;
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync();
         await using var command = new NpgsqlCommand(sql, connection);
-
-        AddParameters(command, image);
+        command.Parameters.AddWithValue("project_id", image.ProjectId);
+        command.Parameters.AddWithValue("image_url", image.ImageUrl);
+        command.Parameters.AddWithValue("caption", (object?)image.Caption ?? DBNull.Value);
+        command.Parameters.AddWithValue("sort_order", image.SortOrder);
 
         return (long)(await command.ExecuteScalarAsync())!;
     }
 
-    // Update an image
     public async Task<bool> UpdateAsync(ProjectImage image)
     {
         const string sql = """
             UPDATE portfolio.project_image
-            SET project_id = @project_id,
-                image_url = @image_url,
-                alt_text = @alt_text,
-                display_order = @display_order
-            WHERE project_image_id = @id;
+            SET image_url = @image_url,
+                caption = @caption,
+                sort_order = @sort_order
+            WHERE image_id = @id;
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync();
         await using var command = new NpgsqlCommand(sql, connection);
-
-        AddParameters(command, image);
-        command.Parameters.AddWithValue("id", image.ProjectImageId);
+        command.Parameters.AddWithValue("id", image.ImageId);
+        command.Parameters.AddWithValue("image_url", image.ImageUrl);
+        command.Parameters.AddWithValue("caption", (object?)image.Caption ?? DBNull.Value);
+        command.Parameters.AddWithValue("sort_order", image.SortOrder);
 
         return await command.ExecuteNonQueryAsync() > 0;
     }
 
-    // Delete an image
     public async Task<bool> DeleteAsync(long id)
     {
-        const string sql = """
-            DELETE FROM portfolio.project_image
-            WHERE project_image_id = @id;
-            """;
+        const string sql = "DELETE FROM portfolio.project_image WHERE image_id = @id;";
 
         await using var connection = await _dataSource.OpenConnectionAsync();
         await using var command = new NpgsqlCommand(sql, connection);
-
         command.Parameters.AddWithValue("id", id);
 
         return await command.ExecuteNonQueryAsync() > 0;
-    }
-
-    private static void AddParameters(
-        NpgsqlCommand command, ProjectImage image)
-    {
-        command.Parameters.AddWithValue("project_id", image.ProjectId);
-        command.Parameters.AddWithValue("image_url", image.ImageUrl);
-        command.Parameters.AddWithValue("alt_text", image.AltText);
-        command.Parameters.AddWithValue("display_order", image.DisplayOrder);
     }
 }

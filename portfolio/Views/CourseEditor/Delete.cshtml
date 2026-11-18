@@ -1,0 +1,14 @@
+﻿@model portfolio.Models.Course
+@{
+    ViewData["Title"] = "Delete Course";
+}
+
+<h1>Delete Course</h1>
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<p>Delete <strong>@Model.Code: @Model.Title</strong>?</p>
+
+<form asp-action="Delete" asp-route-id="@Model.CourseId" method="post">
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-link" asp-action="Index">Cancel</a>
+</form>

@@ -1,0 +1,60 @@
+﻿@using portfolio.Validation
+@model portfolio.Models.Project
+@{
+    ViewData["Title"] = "Images - " + Model.Title;
+}
+
+<h1>Images of @Model.Title</h1>
+<p class="text-muted">@Model.CourseCode: @Model.CourseTitle</p>
+
+@if (TempData["Message"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+
+<form asp-action="Create" method="post" class="row g-2 mb-4">
+    <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+    <div class="col-md-5">
+        <input name="ImageUrl" class="form-control" placeholder="https://.../photo.jpg" required maxlength="500"
+               pattern="@ImageUrlRules.Pattern"
+               title="Must start with http:// or https:// and end in .jpg, .jpeg, .png, .gif or .webp" />
+    </div>
+    <div class="col-md-3">
+        <input name="Caption" class="form-control" placeholder="Caption (optional)" maxlength="150" />
+    </div>
+    <div class="col-md-2">
+        <input name="SortOrder" type="number" min="0" value="0" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Add image</button>
+    </div>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead><tr><th>Preview</th><th>URL</th><th>Caption</th><th>Order</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var img in Model.Images)
+        {
+            <tr>
+                <td><img src="@img.ImageUrl" alt="" style="height:50px" /></td>
+                <td class="text-break">@img.ImageUrl</td>
+                <td>@img.Caption</td>
+                <td>@img.SortOrder</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@img.ImageId">Edit</a>
+                    <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this image?');">
+                        <input type="hidden" name="id" value="@img.ImageId" />
+                        <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-controller="ProjectEditor" asp-action="Index">Back to projects</a>

@@ -1,0 +1,39 @@
+﻿@model List<portfolio.Models.Course>
+@{
+    ViewData["Title"] = "Manage Courses";
+}
+
+<h1>Manage Courses</h1>
+
+@if (TempData["Message"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Add course</a>
+    <a class="btn btn-success" asp-controller="ProjectEditor" asp-action="Create">Add project</a>
+</p>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr><th>Code</th><th>Title</th><th>Term</th><th>School year</th><th>Projects</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Code</td>
+                <td>@c.Title</td>
+                <td>@c.Term</td>
+                <td>@c.SchoolYear</td>
+                <td>@c.ProjectCount</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-success" asp-controller="ProjectEditor" asp-action="Create" asp-route-courseId="@c.CourseId">+ Project</a>
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@c.CourseId">Edit</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@c.CourseId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

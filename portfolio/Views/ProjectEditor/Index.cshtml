@@ -1,0 +1,35 @@
+﻿@model List<portfolio.Models.Project>
+@{
+    ViewData["Title"] = "Manage Projects";
+}
+
+<h1>Manage Projects</h1>
+
+@if (TempData["Message"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<p><a class="btn btn-primary" asp-action="Create">Add project</a></p>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr><th>Course</th><th>Title</th><th>Video</th><th>Images</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.CourseCode</td>
+                <td>@p.Title</td>
+                <td>@(string.IsNullOrEmpty(p.VideoUrl) ? "-" : "Yes")</td>
+                <td>@p.ImageCount</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="ImageEditor" asp-action="Index" asp-route-projectId="@p.ProjectId">Images</a>
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.ProjectId">Edit</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@p.ProjectId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

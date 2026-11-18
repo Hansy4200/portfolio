@@ -1,5 +1,5 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace portfolio.Models;
 
@@ -7,31 +7,33 @@ public class Project
 {
     public long ProjectId { get; set; }
 
-    [Required(ErrorMessage = "Please select a course.")]
+    [Display(Name = "Course")]
+    [Range(1, int.MaxValue, ErrorMessage = "Choose a course.")]
     public long CourseId { get; set; }
-
-    public string? CourseTitle { get; set; }
 
     [Required(ErrorMessage = "Project title is required.")]
     [StringLength(120)]
     public string Title { get; set; } = string.Empty;
 
-    [StringLength(250)]
-    public string? Summary { get; set; }
-
     public string? Description { get; set; }
 
-    [StringLength(250)]
-    public string? Technologies { get; set; }
-
-    [StringLength(500)]
+    [Display(Name = "Video link (YouTube)")]
+    [StringLength(300)]
+    [RegularExpression(@"^https?://(www\.)?(youtube\.com|youtu\.be)/\S+$",
+        ErrorMessage = "Video link must be a YouTube link, such as https://www.youtube.com/watch?v=... or https://youtu.be/...")]
     public string? VideoUrl { get; set; }
 
+    [Display(Name = "Completed on")]
+    [DataType(DataType.Date)]
     public DateOnly? CompletedOn { get; set; }
 
-    public bool Featured { get; set; }
+    // Form only: one image URL per line
+    [Display(Name = "Image URLs (one per line)")]
+    public string? ImageUrls { get; set; }
 
+    // Display only
+    [ValidateNever] public string? CourseCode { get; set; }
+    [ValidateNever] public string? CourseTitle { get; set; }
     public int ImageCount { get; set; }
-
-    public List<ProjectImage> Images { get; set; } = new();
+    [ValidateNever] public List<ProjectImage> Images { get; set; } = new();
 }

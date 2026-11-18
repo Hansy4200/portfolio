@@ -1,0 +1,15 @@
+﻿@model portfolio.Models.Course
+@{
+    ViewData["Title"] = "Add Course";
+}
+
+<h1>Add Course</h1>
+<form asp-action="Create" method="post">
+    <partial name="_CourseForm" model="Model" />
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-link" asp-action="Index">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

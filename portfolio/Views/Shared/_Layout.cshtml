@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var inEditor = ctrl.EndsWith("Editor");
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -20,12 +24,27 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (inEditor)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="CourseEditor" asp-action="Index">Manage courses</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="ProjectEditor" asp-action="Index">Manage projects</a>
+                            </li>
+                            <li class="nav-item ms-sm-auto">
+                                <a class="nav-link text-dark fw-bold" asp-controller="Courses" asp-action="Index">Switch to Viewer</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Courses" asp-action="Index">Courses</a>
+                            </li>
+                            <li class="nav-item ms-sm-auto">
+                                <a class="nav-link text-dark fw-bold" asp-controller="CourseEditor" asp-action="Index">Switch to Editor</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

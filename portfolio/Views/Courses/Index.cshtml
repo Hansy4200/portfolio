@@ -1,0 +1,30 @@
+﻿@model List<portfolio.Models.Course>
+@{
+    ViewData["Title"] = "Courses";
+}
+
+<h1 class="mb-4">Courses</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No courses yet.</p>
+}
+
+<div class="row row-cols-1 row-cols-md-2 g-3">
+    @foreach (var c in Model)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@c.Code: @c.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@c.Term, SY @c.SchoolYear</h6>
+                    <p class="card-text">@c.Description</p>
+                    <span class="badge bg-secondary">@c.ProjectCount project(s)</span>
+                </div>
+                <div class="card-footer bg-white">
+                    <a asp-action="Details" asp-route-id="@c.CourseId">View course</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
