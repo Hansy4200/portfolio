@@ -1,29 +1,51 @@
+
+using Npgsql;
+using portfolio.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add MVC services
 builder.Services.AddControllersWithViews();
 
+// Get Supabase connection string
+var connectionString = builder.Configuration
+    .GetConnectionString("portfolio");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "Connection string 'portfolio' is missing.");
+}
+
+// Configure database connection
+var dataSource = NpgsqlDataSource.Create(connectionString);
+
+builder.Services.AddSingleton(dataSource);
+
+// Register repositories
+builder.Services.AddScoped<CourseRepository>();
+builder.Services.AddScoped<ProjectRepository>();
+builder.Services.AddScoped<ProjectImageRepository>();
+
+// IMPORTANT: Build only AFTER registering all services
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure HTTP pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
